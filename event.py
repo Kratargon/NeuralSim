@@ -1,12 +1,13 @@
-#Event, V.0.0.2
+#Event, V.0.0.3
 #Featuring:
 #   -Time of firing
 #   -Neuron that fires
 #   -Value (as 'fire' or a shock value)
 #
-#   -Ability to retrieve own time
 #   -Ability to perform stored action; returns true if neuron fires
-#   -Ability to retrieve stored neuron's ID
+#
+#   -External access to ID of action's neuron
+#   -External access to action's time
 
 class Event:
     def __init__(self, time, subject, action):

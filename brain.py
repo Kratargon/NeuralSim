@@ -1,4 +1,4 @@
-#Brain, V.0.0.3
+#Brain, V.0.0.4
 #Featuring:
 #   -Brain IDs
 #   -List of neurons
@@ -7,6 +7,8 @@
 #
 #   -Ability to add neurons to a brain
 #   -Ability to simulate a period of time and record simulation firing data
+#
+#   -Directly interfaces: Neuron, Event
 
 from neuron import *
 from event import *
@@ -17,9 +19,9 @@ class Brain:
         self.id = val
         # This is a list containing all the neurons that belong to this brain
         self.neurons = []
-        # TODO This file is in format
+        # This file is a CSV file in format (time, subject, action)
         self.inputFile = inputFile
-        # This is an active list of all events that are currently planned to take place, in the correct temporal order
+        # This is an active list of all events that are currently planned to take place, in the correct temporal order, as event objects
         self.eventList = []
         # This records every neuron that fired by time of action and id, in temporal order, as sublists of size 2
         self.fireRecord = []
@@ -36,7 +38,7 @@ class Brain:
             # Fire the next neuron; this function updates the current time
             self.fireNext()
             # If the brain goes 'silent' and never fires again, ensure that we return even though the brain's time never advances
-            if len(eventList) == 0:
+            if len(self.eventList) == 0:
                 return self.fireRecord
         return self.fireRecord
 
@@ -56,19 +58,28 @@ class Brain:
 
     def fireNext(self):
         # Catch condition for if there's nothing left to fire
-        if len(eventList) == 0:
+        if len(self.eventList) == 0:
             return
         # Grab the event from the list and remove it from the list
-        nextEvent = eventList.pop(0)
+        nextEvent = self.eventList.pop(0)
         # Update time
         self.currentTime = nextEvent.getTime()
         # Event objects have the ability to act on their own, so call on them to do so
         if nextEvent.act():
             # Record the action if it was a fire (nextEvent returns true if it's a fire)
             self.fireRecord.append([self.currentTime, nextEvent.getNeuronID()])
-        #This is where I should fix the eventList to reflect the new reality
+        # Adds all events to the list, if they aren't already there
+        # Neurons that could be impacted by the shock is every descendant of the action
+        # TODO: Write comparator for Event class so we can determine equality correctly
+        for i in self.neurons[nextEvent.getNeuronID()].getOutputs():
+            for (j, k) in i.getShockTimes():
+                event = Event(j, i, k)
+                if event not in self.eventList:
+                    self.eventList.append(Event(j, self.neurons[i], k))
+        # TODO: Re-sort list so that it remains properly sorted by time
 
     def importInputData(self, data):
         self.inputFile = data
-        #I should update EventList here
+        for i in data:
+            self.eventList.append(Event(i[0], self.neurons[i[1]], i[2]))
         

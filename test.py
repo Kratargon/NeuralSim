@@ -27,7 +27,7 @@ def generateBrainData(brain=setupSmolBrain(), maxTime=100, minCount=10, maxCount
     for i in range(randrange(minCount, maxCount)):
         for i in range(randint(0, len(brain.neurons))):
             time = randrange(1, maxTime)
-            firingList.append((time, brain.neurons[i].id))
+            firingList.append((time, brain.neurons[i].id, "fire"))
     with open('randomSmolBrainData.csv', 'w', newline='') as csvfile:
         brainwriter = csv.writer(csvfile)
         brainwriter.writerows(firingList)
