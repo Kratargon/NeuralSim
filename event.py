@@ -32,3 +32,10 @@ class Event:
 
     def getNeuronID(self):
         return self.neuron.id
+
+    def __eq__(self, other): 
+        if not isinstance(other, Event):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return self.time == other.time and self.neuron == other.neuron and self.value == other.value

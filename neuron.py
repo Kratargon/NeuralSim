@@ -1,4 +1,4 @@
-#Neuron, V.0.0.3
+#Neuron, V.0.0.4
 #Featuring:
 #   -Neural IDs
 #   -List of inputs (Axons?)
@@ -12,6 +12,10 @@
 #
 #   -External access to outputs
 #   -External access to shock times
+#
+#   -Directly interfaces: Axon
+
+from axon import *
 
 class Neuron:
     def __init__(self, brain, number):
@@ -29,6 +33,11 @@ class Neuron:
         self.shockTimes = []
         # A market for visualizations
         self.drawn = False
+        # What time it is now
+        self.now = 0
+
+    def setTime(self, time):
+        self.now = time
 
     def surgery(self, nin, nout):
         # Append all elements of nin to elements that fire into this neuron
@@ -48,14 +57,27 @@ class Neuron:
             self.outputs.append(nout)
             nout.inputs.append(self)
 
+    def axonalSurgery(self, nout):
+        # Adds an axon between an element and its descendants
+        if (nout != None):
+            if type(nout) == list:
+                for i in nout:
+                    axon = Axon(outputs = nout)
+                    self.inputs.append(axon)
+                    nout.inputs.append(axon)
+            axon = Axon(outputs = [nout])
+            self.outputs.append(axon)
+            nout.inputs.append(axon)
+        return
+
     def timeShock(self, shock, time):
         # Add a new time at which this neuron will be shocked
-        self.shockTimes.append((time, shock))
+        self.shockTimes.append((time + self.now, shock))
 
     def applySHOCK(self, shock):
         # Shock this neuron; if it crosses the threshold, fire
         self.threshold += shock
-        if self.threshold > 3:
+        if self.threshold > 5:
             self.fire()
             return True
         return False
@@ -66,6 +88,7 @@ class Neuron:
             i.applySHOCK(1)
 
     def visualizeStatic(self):
+        # TODO fix this
         # If this neuron hasn't been drawn
         if self.drawn == False:
             # Draw its inputs
@@ -81,6 +104,17 @@ class Neuron:
     def getOutputs(self):
         # The list of objects this neuron can impact
         return self.outputs
+
+    def getNeuralOutputs(self):
+        neurons = []
+        for i in self.outputs:
+            if type(i) == Axon:
+                neurons = neurons + i.getOutputs()
+            if type(i) == Neuron:
+                neurons.append(i)
+        return neurons
+
+
 
     def getShockTimes(self):
         # The list of shocks and times they will occur at

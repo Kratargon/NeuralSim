@@ -15,12 +15,33 @@ def setupSmolBrain(n=0):
     n1.surgery(n0, n2)
     return smolBrain
 
+def setupSmolAxonalBrain(n=0):
+    brain = Brain(n)
+    brain.addNeuron()
+    n0 = brain.neurons[0]
+    brain.addNeuron()
+    n1 = brain.neurons[1]
+    brain.addNeuron()
+    n2 = brain.neurons[2]
+    n0.axonalSurgery(n1)
+    n0.axonalSurgery(n2)
+    return brain
+
 def setupRandomBrain(n=0, minNeurons=100, maxNeurons=500, minAxons=100, maxAxons=500):
     randBrain = Brain(0)
     for i in range(randrange(minNeurons, maxNeurons)):
         randBrain.addNeuron()
     for i in range(randint(minAxons, maxAxons)):
         randBrain.neurons[randrange(0, randBrain.size())].surgery(randBrain.neurons[randrange(0, randBrain.size())], randBrain.neurons[randrange(0, randBrain.size())])
+    return randBrain
+
+def setupRandomAxonalBrain(n=0, minNeurons=100, maxNeurons=500, minAxons=100, maxAxons=500):
+    randBrain = Brain(0)
+    for i in range(randrange(minNeurons, maxNeurons)):
+        randBrain.addNeuron()
+    for i in range(randint(minAxons, maxAxons)):
+        randBrain.neurons[randrange(0, randBrain.size())].axonalSurgery(randBrain.neurons[randrange(0, randBrain.size())])
+    return randBrain
 
 def generateBrainData(brain=setupSmolBrain(), maxTime=100, minCount=10, maxCount=100):
     firingList = []
@@ -152,15 +173,29 @@ def visualizeSmolBrain():
     smolBrain = setupSmolBrain()
     smolBrain.visualizeStatic()
 
+def visualizeSmolAxonalBrain():
+    print()
+    brain = setupSmolAxonalBrain()
+    brain.visualizeStatic()
+
 #Simulations
 
 def simulateSmolBrain():
-    brain = setupSmolBrain()
+    brain = setupSmolAxonalBrain()
     brain.importInputData(generateBrainData(brain))
     record = brain.simulate(1000)
     processBrainData(record)
-    print("Smol Brain Simulated")
+    print("Smol Axonal Brain Simulated")
+
+def simulateRandomBrain():
+    brain = setupRandomAxonalBrain()
+    brain.importInputData(generateBrainData(brain))
+    record = brain.simulate(1000)
+    processBrainData(record)
+    print("Random Axonal Brain Simulated")
 
 #fullTestSuite()
 #visualizeSmolBrain()
 simulateSmolBrain()
+#simulateRandomBrain()
+#visualizeSmolAxonalBrain()

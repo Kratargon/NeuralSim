@@ -1,4 +1,4 @@
-#Brain, V.0.0.4
+#Brain, V.0.0.5
 #Featuring:
 #   -Brain IDs
 #   -List of neurons
@@ -64,22 +64,38 @@ class Brain:
         nextEvent = self.eventList.pop(0)
         # Update time
         self.currentTime = nextEvent.getTime()
+        for i in self.neurons:
+            i.setTime(self.currentTime)
         # Event objects have the ability to act on their own, so call on them to do so
         if nextEvent.act():
             # Record the action if it was a fire (nextEvent returns true if it's a fire)
             self.fireRecord.append([self.currentTime, nextEvent.getNeuronID()])
         # Adds all events to the list, if they aren't already there
         # Neurons that could be impacted by the shock is every descendant of the action
-        # TODO: Write comparator for Event class so we can determine equality correctly
-        for i in self.neurons[nextEvent.getNeuronID()].getOutputs():
+        for i in self.neurons[nextEvent.getNeuronID()].getNeuralOutputs():
             for (j, k) in i.getShockTimes():
                 event = Event(j, i, k)
                 if event not in self.eventList:
-                    self.eventList.append(Event(j, self.neurons[i], k))
-        # TODO: Re-sort list so that it remains properly sorted by time
+                    self.eventList.append(Event(j, i, k))
+        # Re-sort list so that it remains properly sorted by time
+        self.sortData()
 
     def importInputData(self, data):
         self.inputFile = data
         for i in data:
             self.eventList.append(Event(i[0], self.neurons[i[1]], i[2]))
+        # We do not assume the data is sorted
+        self.sortData()
+
+    def sortData(self):
+        # Sort by time, by running quicksort
+        self.eventList = self.qsort(self.eventList)
         
+    def qsort(self, inlist):
+        if inlist == []: 
+            return []
+        else:
+            pivot = inlist[0]
+            lesser = self.qsort([x for x in inlist[1:] if x.getTime() < pivot.getTime()])
+            greater = self.qsort([x for x in inlist[1:] if x.getTime() >= pivot.getTime()])
+            return lesser + [pivot] + greater
